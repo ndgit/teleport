@@ -31,45 +31,19 @@ import (
 type Cluster struct {
 	// Name is the cluster name
 	Name string
-	// Dir is the directory where cluster certificates are stored
-	Dir string
+	// dir is the directory where cluster certificates are stored
+	dir string
 	// Status is the cluster status
-	Status client.ProfileStatus
+	status client.ProfileStatus
 	// client is the cluster Teleport client
 	client *client.TeleportClient
-}
-
-// NewCluster creates new cluster
-func NewCluster(name, dir string) (*Cluster, error) {
-	if name == "" {
-		return nil, trace.BadParameter("cluster name is missing")
-	}
-
-	if dir == "" {
-		return nil, trace.BadParameter("cluster directory is missing")
-	}
-
-	cfg := client.MakeDefaultConfig()
-	cfg.WebProxyAddr = name
-	cfg.HomePath = dir
-	cfg.KeysDir = dir
-
-	client, err := client.NewClient(cfg)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-
-	return &Cluster{
-		Dir:    dir,
-		Name:   name,
-		client: client,
-	}, nil
-
+	// clock is a clock for time-related operations
+	clock clockwork.Clock
 }
 
 // Connected indicates if connection to the cluster can be established
-func (c *Cluster) Connected(clock clockwork.Clock) bool {
-	return c.Status.IsExpired(clock)
+func (c *Cluster) Connected() bool {
+	return c.status.Name != "" && !c.status.IsExpired(c.clock)
 }
 
 // SyncAuthPreference fetches Teleport auth preferences and stores it in the cluster profile
@@ -79,7 +53,7 @@ func (c *Cluster) SyncAuthPreference(ctx context.Context) (*webclient.Authentica
 		return nil, trace.Wrap(err)
 	}
 
-	if err := c.client.SaveProfile(c.Dir, false); err != nil {
+	if err := c.client.SaveProfile(c.dir, false); err != nil {
 		return nil, trace.Wrap(err)
 	}
 
@@ -95,7 +69,7 @@ func (c *Cluster) GetRoles(ctx context.Context) ([]*types.Role, error) {
 	defer proxyClient.Close()
 
 	roles := []*types.Role{}
-	for _, name := range c.Status.Roles {
+	for _, name := range c.status.Roles {
 		role, err := proxyClient.GetRole(ctx, name)
 		if err != nil {
 			return nil, trace.Wrap(err)
@@ -114,10 +88,33 @@ func (c *Cluster) GetUser(ctx context.Context) (types.User, error) {
 	}
 	defer proxyClient.Close()
 
-	user, err := proxyClient.GetUser(ctx, c.Status.Username)
+	user, err := proxyClient.GetUser(ctx, c.status.Username)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
 
 	return user, nil
+}
+
+// SSOLogin logs in a user to the Teleport cluster using supported SSO provider
+func (c *Cluster) SSOLogin(ctx context.Context, providerType, providerName string) error {
+	// ping Teleport proxy to update this cluster profile
+	if _, err := c.client.Ping(ctx); err != nil {
+		return trace.Wrap(err)
+	}
+
+	key, err := c.client.SSOLogin(ctx, providerType, providerName)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	if err := c.client.ActivateKey(ctx, key); err != nil {
+		return trace.Wrap(err)
+	}
+
+	if err := c.client.SaveProfile(c.dir, true); err != nil {
+		return trace.Wrap(err)
+	}
+
+	return nil
 }

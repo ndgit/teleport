@@ -37,7 +37,7 @@ func Start(ctx context.Context, cfg Config) error {
 	}
 
 	daemonService, err := daemon.New(daemon.Config{
-		WorkingDir: profileDir,
+		Dir: profileDir,
 	})
 	if err != nil {
 		return trace.Wrap(err)

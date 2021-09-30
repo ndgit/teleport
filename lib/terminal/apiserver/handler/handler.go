@@ -19,7 +19,6 @@ import (
 
 	"github.com/gravitational/teleport/lib/terminal/daemon"
 	"github.com/gravitational/trace"
-	"github.com/jonboulle/clockwork"
 
 	v1 "github.com/gravitational/teleport/lib/terminal/api/protogen/golang/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -49,7 +48,7 @@ func (s *Handler) ListClusters(ctx context.Context, r *v1.ListClustersRequest) (
 	for _, cluster := range s.DaemonService.GetClusters() {
 		proto := &v1.Cluster{
 			Name:      cluster.Name,
-			Connected: cluster.Connected(clockwork.NewRealClock()),
+			Connected: cluster.Connected(),
 		}
 		result = append(result, proto)
 	}
@@ -72,7 +71,7 @@ func (s *Handler) CreateCluster(ctx context.Context, req *v1.CreateClusterReques
 
 	proto := &v1.Cluster{
 		Name:      cluster.Name,
-		Connected: cluster.Connected(clockwork.NewRealClock()),
+		Connected: cluster.Connected(),
 	}
 
 	return proto, nil
@@ -90,29 +89,17 @@ func (s *Handler) GetClusterAuthSettings(ctx context.Context, req *v1.GetCluster
 	}
 
 	result := &v1.ClusterAuthSettings{
-		Type:         settings.Type,
-		SecondFactor: string(settings.SecondFactor),
+		Type:          settings.Type,
+		SecondFactor:  string(settings.SecondFactor),
+		AuthProviders: []*v1.AuthProvider{},
 	}
 
-	if settings.OIDC != nil {
-		result.OIDC = &v1.AuthSettingsSSO{
-			Name:    settings.OIDC.Name,
-			Display: settings.OIDC.Display,
-		}
-	}
-
-	if settings.SAML != nil {
-		result.SAML = &v1.AuthSettingsSSO{
-			Name:    settings.SAML.Name,
-			Display: settings.SAML.Display,
-		}
-	}
-
-	if settings.Github != nil {
-		result.Github = &v1.AuthSettingsSSO{
-			Name:    settings.Github.Name,
-			Display: settings.Github.Display,
-		}
+	for _, provider := range settings.AuthProviders {
+		result.AuthProviders = append(result.AuthProviders, &v1.AuthProvider{
+			Type:    provider.Type,
+			Name:    provider.Name,
+			Display: provider.Display,
+		})
 	}
 
 	return result, nil

@@ -175,20 +175,10 @@ export class ClusterAuthSettings extends jspb.Message {
   getU2fs(): AuthSettingsU2F | undefined;
   setU2fs(value?: AuthSettingsU2F): void;
 
-  hasOidc(): boolean;
-  clearOidc(): void;
-  getOidc(): AuthSettingsSSO | undefined;
-  setOidc(value?: AuthSettingsSSO): void;
-
-  hasSaml(): boolean;
-  clearSaml(): void;
-  getSaml(): AuthSettingsSSO | undefined;
-  setSaml(value?: AuthSettingsSSO): void;
-
-  hasGithub(): boolean;
-  clearGithub(): void;
-  getGithub(): AuthSettingsSSO | undefined;
-  setGithub(value?: AuthSettingsSSO): void;
+  clearAuthprovidersList(): void;
+  getAuthprovidersList(): Array<AuthProvider>;
+  setAuthprovidersList(value: Array<AuthProvider>): void;
+  addAuthproviders(value?: AuthProvider, index?: number): AuthProvider;
 
   getHasmessageoftheday(): boolean;
   setHasmessageoftheday(value: boolean): void;
@@ -208,14 +198,15 @@ export namespace ClusterAuthSettings {
     type: string,
     secondfactor: string,
     u2fs?: AuthSettingsU2F.AsObject,
-    oidc?: AuthSettingsSSO.AsObject,
-    saml?: AuthSettingsSSO.AsObject,
-    github?: AuthSettingsSSO.AsObject,
+    authprovidersList: Array<AuthProvider.AsObject>,
     hasmessageoftheday: boolean,
   }
 }
 
-export class AuthSettingsSSO extends jspb.Message {
+export class AuthProvider extends jspb.Message {
+  getType(): string;
+  setType(value: string): void;
+
   getName(): string;
   setName(value: string): void;
 
@@ -223,17 +214,18 @@ export class AuthSettingsSSO extends jspb.Message {
   setDisplay(value: string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): AuthSettingsSSO.AsObject;
-  static toObject(includeInstance: boolean, msg: AuthSettingsSSO): AuthSettingsSSO.AsObject;
+  toObject(includeInstance?: boolean): AuthProvider.AsObject;
+  static toObject(includeInstance: boolean, msg: AuthProvider): AuthProvider.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: AuthSettingsSSO, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): AuthSettingsSSO;
-  static deserializeBinaryFromReader(message: AuthSettingsSSO, reader: jspb.BinaryReader): AuthSettingsSSO;
+  static serializeBinaryToWriter(message: AuthProvider, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AuthProvider;
+  static deserializeBinaryFromReader(message: AuthProvider, reader: jspb.BinaryReader): AuthProvider;
 }
 
-export namespace AuthSettingsSSO {
+export namespace AuthProvider {
   export type AsObject = {
+    type: string,
     name: string,
     display: string,
   }

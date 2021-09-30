@@ -170,6 +170,7 @@ func (a *LocalKeyAgent) LoadKeyForCluster(clusterName string) (*agent.AddedKey, 
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
+
 	return a.LoadKey(*key)
 }
 

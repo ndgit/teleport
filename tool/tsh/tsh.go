@@ -1711,7 +1711,6 @@ func makeClient(cf *CLIConf, useProfileLogin bool) (*client.TeleportClient, erro
 	}
 
 	// Look if a user identity was given via -i flag
-	fmt.Print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
 	if cf.IdentityFileIn != "" {
 		// Ignore local authentication methods when identity file is provided
 		c.SkipLocalAuth = true
@@ -1787,7 +1786,6 @@ func makeClient(cf *CLIConf, useProfileLogin bool) (*client.TeleportClient, erro
 		c.Namespace = cf.Namespace
 	}
 	if cf.Username != "" {
-		fmt.Print("NOOOOOOOOOOOOOOOOOOOOOOOOOO USUUUUUUUUUUUUUUUUUUUUUSER", cf.Username)
 		c.Username = cf.Username
 	}
 

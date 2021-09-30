@@ -119,7 +119,7 @@ func newListener(host string) (net.Listener, error) {
 	case "unix":
 		addr = parts[1]
 	default:
-		return nil, trace.BadParameter("Unsupported network protocol: %s", network)
+		return nil, trace.BadParameter("invalid unix socket address: %s", network)
 	}
 
 	lis, err := net.Listen(network, addr)

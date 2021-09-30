@@ -297,6 +297,7 @@ func (fs *FSLocalKeyStore) updateKeyWithCerts(o CertOption, key *Key) error {
 	certPath := o.certPath(fs.KeyDir, key.KeyIndex)
 	info, err := os.Stat(certPath)
 	if err != nil {
+		fmt.Println("REAADING FROM FILE:", certPath)
 		return trace.ConvertSystemError(err)
 	}
 

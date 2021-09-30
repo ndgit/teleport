@@ -6,10 +6,55 @@ option go_package = "github.com/gravitational/teleport/lib/terminal/v1";
 
 message ClusterLoginChallenge {
     string id = 1;
-
     // TODO(codingllama): Add support for password, OTP and MFA.
 }
 
 message SolvedClusterLoginChallenge {
     // TODO(codingllama): Add support for password, OTP and MFA.
 }
+
+
+
+/*
+
+
+
+
+
+service.CreateLoginChallenge(req{
+    ClusterName: "xxxx",
+    AuthType: "zzzz"
+})
+
+service.ResolveLoginChallenge(req{
+    challengeID: "xxxx",
+    local: {
+        username: "test",
+        password: "mama"
+    },
+    mfa: {
+        username: "test",
+        password: "mama"
+    },
+
+    // User is a teleport username
+	User string `json:"user"`
+	// Password for the user, to authenticate in case no MFA check was
+	// performed.
+	Password string `json:"password"`
+	// U2FSignResponse is the signature from the U2F device
+	U2FSignResponse *u2f.AuthenticateChallengeResponse `json:"u2f_sign_response"`
+	// WebauthnChallengeResponse is a signed WebAuthn credential assertion.
+	WebauthnChallengeResponse *wanlib.CredentialAssertionResponse `json:"webauthn_challenge_response"`
+	// TOTPCode is a code from the TOTP device.
+	TOTPCode string `json:"totp_code"`
+
+
+})
+
+
+KeyHandle     string `json:"keyHandle"`
+	SignatureData string `json:"signatureData"`
+	ClientData    string `json:"clientData"`
+
+*/

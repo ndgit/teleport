@@ -68,23 +68,21 @@ message ClusterAuthSettings {
     // U2F contains the Universal Second Factor settings needed for authentication.
     AuthSettingsU2F U2Fs = 3;
     // OIDC contains OIDC connector settings needed for authentication.
-    AuthSettingsSSO OIDC = 4;
-    // SAML contains SAML connector settings needed for authentication.
-    AuthSettingsSSO SAML = 5;
-    // Github contains Github connector settings needed for authentication.
-    AuthSettingsSSO Github = 6;
+    repeated AuthProvider AuthProviders = 4;
     // HasMessageOfTheDay is a flag indicating that the cluster has MOTD
     // banner text that must be retrieved, displayed and acknowledged by
     // the user.
-    bool HasMessageOfTheDay = 7;
+    bool HasMessageOfTheDay = 5;
 }
 
 // SSOSettings is SSO provider settings
-message AuthSettingsSSO {
+message AuthProvider {
+    // Type is the auth provider type (github|oidc|etc)
+    string Type = 1;
     // Name is the internal name of the connector.
-    string Name = 1;
+    string Name = 2;
     // Display is the display name for the connector.
-    string Display = 2;
+    string Display = 3;
 }
 
 // U2FSettings contains the AppID for Universal Second Factor.
