@@ -58,7 +58,7 @@ func Start(ctx context.Context, cfg Config) error {
 		serverAPIWait <- err
 	}()
 
-	log.Infof("Teleport API Server is listening on %v", cfg.Addr)
+	log.Infof("tshd is listening on %v", cfg.Addr)
 
 	// Wait for shutdown signals
 	go func() {

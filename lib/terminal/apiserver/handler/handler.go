@@ -60,11 +60,7 @@ func (s *Handler) ListClusters(ctx context.Context, r *v1.ListClustersRequest) (
 
 // CreateCluster creates a new cluster
 func (s *Handler) CreateCluster(ctx context.Context, req *v1.CreateClusterRequest) (*v1.Cluster, error) {
-	if err := s.DaemonService.CreateCluster(ctx, req.Name); err != nil {
-		return nil, trace.Wrap(err)
-	}
-
-	cluster, err := s.DaemonService.GetCluster(req.Name)
+	cluster, err := s.DaemonService.CreateCluster(ctx, req.Name)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
@@ -83,18 +79,18 @@ func (s *Handler) GetClusterAuthSettings(ctx context.Context, req *v1.GetCluster
 		return nil, trace.Wrap(err)
 	}
 
-	settings, err := cluster.SyncAuthPreference(ctx)
+	preferences, err := cluster.SyncAuthPreference(ctx)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
 
 	result := &v1.ClusterAuthSettings{
-		Type:          settings.Type,
-		SecondFactor:  string(settings.SecondFactor),
+		Type:          preferences.Type,
+		SecondFactor:  string(preferences.SecondFactor),
 		AuthProviders: []*v1.AuthProvider{},
 	}
 
-	for _, provider := range settings.AuthProviders {
+	for _, provider := range preferences.AuthProviders {
 		result.AuthProviders = append(result.AuthProviders, &v1.AuthProvider{
 			Type:    provider.Type,
 			Name:    provider.Name,

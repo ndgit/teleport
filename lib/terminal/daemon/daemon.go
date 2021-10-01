@@ -16,7 +16,6 @@ package daemon
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gravitational/trace"
 	"github.com/jonboulle/clockwork"
@@ -67,22 +66,20 @@ func (s *Service) GetClusters() []*Cluster {
 }
 
 // CreateCluster creates a new cluster
-func (s *Service) CreateCluster(ctx context.Context, clusterName string) error {
-	fmt.Print("MAMA", len(s.clusters))
+func (s *Service) CreateCluster(ctx context.Context, clusterName string) (*Cluster, error) {
 	for _, cluster := range s.clusters {
-		fmt.Print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", s.clusters)
 		if cluster.Name == clusterName {
-			return trace.BadParameter("cluster %v already exists", clusterName)
+			return nil, trace.BadParameter("cluster %v already exists", clusterName)
 		}
 	}
 
 	cluster, err := s.newCluster(s.Dir, clusterName)
 	if err != nil {
-		return trace.Wrap(err)
+		return nil, trace.Wrap(err)
 	}
 
 	s.clusters = append(s.clusters, cluster)
-	return nil
+	return cluster, nil
 }
 
 // GetCluster returns a cluster by its name
@@ -96,7 +93,7 @@ func (s *Service) GetCluster(name string) (*Cluster, error) {
 	return nil, trace.NotFound("cluster %v is not found", name)
 }
 
-// LoadClusters initializes existing clusters from their profiles
+// LoadClusters loads clusters from saved profiles
 func (s *Service) LoadClusters() error {
 	pfNames, err := profile.ListProfileNames(s.Dir)
 	if err != nil {
@@ -104,12 +101,10 @@ func (s *Service) LoadClusters() error {
 	}
 
 	for _, name := range pfNames {
-		cluster, err := s.LoadClusterFromProfile(name)
+		cluster, err := s.newClusterFromProfile(name)
 		if err != nil {
 			return trace.Wrap(err)
 		}
-
-		fmt.Printf("CLUSTER: %v %v", name, cluster)
 
 		s.clusters = append(s.clusters, cluster)
 	}
@@ -118,7 +113,7 @@ func (s *Service) LoadClusters() error {
 }
 
 // newClusterFromProfile creates new cluster from its profile
-func (s *Service) LoadClusterFromProfile(name string) (*Cluster, error) {
+func (s *Service) newClusterFromProfile(name string) (*Cluster, error) {
 	if name == "" {
 		return nil, trace.BadParameter("name is missing")
 	}
@@ -138,7 +133,7 @@ func (s *Service) LoadClusterFromProfile(name string) (*Cluster, error) {
 
 	status := &client.ProfileStatus{}
 
-	// load profile status if it exists
+	// load profile status if key exists
 	_, err = clt.LocalAgent().GetKey(name)
 	if err == nil || cfg.Username == "" {
 		status, err = client.StatusFromFile(s.Dir, name)

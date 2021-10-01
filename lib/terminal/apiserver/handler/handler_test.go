@@ -16,77 +16,35 @@ package handler_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
+	v1 "github.com/gravitational/teleport/lib/terminal/api/protogen/golang/v1"
+	"github.com/gravitational/teleport/lib/terminal/apiserver/handler"
 	"github.com/gravitational/teleport/lib/terminal/daemon"
 
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	profileDir = "/home/alexey/go/src/github.com/gravitational/_terminal"
-)
-
-func FTestStart(t *testing.T) {
+func TestHandler(t *testing.T) {
 	d, err := daemon.New(daemon.Config{
-		Dir: profileDir,
+		Dir: t.TempDir(),
 	})
 	require.NoError(t, err)
 
-	err = d.LoadClusters()
-	require.NoError(t, err)
-
-	err = d.CreateCluster(context.TODO(), "localhost:3080")
-	require.NoError(t, err)
-
-	// err = d.CreateCluster(context.TODO(), "platform.teleport.sh")
-	// require.NoError(t, err)
-
-	//_, err = d.GetCluster("localhost:3080")
-	//require.NoError(t, err)
-
-	//cluster.SSOLogin(context.Background(), "github", "github")
-
-	//roles, _ := cluster.GetRoles(context.TODO())
-	//fmt.Print("AAAAAAAAAAAAAAAAAAAAAA:", roles)
-	//require.Error(t, err)
-
-	// 	err = cluster.SSOLogin(context.TODO(), "saml", "okta")
-	// 	require.NoError(t, err)
-
-	// 	err = cluster2.SSOLogin(context.TODO(), "saml", "okta")
-	// 	require.NoError(t, err)
-}
-
-func TestS(t *testing.T) {
-	d, err := daemon.New(daemon.Config{
-		Dir: profileDir,
+	h, err := handler.New(handler.Config{
+		DaemonService: d,
 	})
 	require.NoError(t, err)
 
-	err = d.LoadClusters()
+	cluster1, err := h.CreateCluster(context.TODO(), &v1.CreateClusterRequest{
+		Name: "cluster1",
+	})
 	require.NoError(t, err)
-	//
-	//err = d.CreateCluster(context.TODO(), "test.sh")
-	//require.NoError(t, err)
 
-	//_, err = d.LoadClusterFromProfile("teleport.teleportinfra.sh")
-	cluster, err := d.LoadClusterFromProfile("localhost:3080")
+	require.Equal(t, cluster1.Name, "cluster1")
+	require.False(t, cluster1.Connected)
 
-	fmt.Print("AAA", cluster.Name)
-	require.Error(t, err)
-
-	//fmt.Print("AAL CLUSTERS:", cluster.Connected())
-	//require.NoError(t, err)
-
-	//_, err = cluster.GetRoles(context.TODO())
-	//require.NoError(t, err)
-
-	//err = d.CreateCluster(context.TODO(), "platform.teleport2.sh")
-	//require.NoError(t, err)
-	//cluster, err := d.GetCluster("platform.teleport2.sh")
-	//require.NoError(t, err)
-	//_, err = cluster.GetRoles(context.TODO())
-	//require.NoError(t, err)
+	response, err := h.ListClusters(context.TODO(), &v1.ListClustersRequest{})
+	require.NoError(t, err)
+	require.Len(t, response.Clusters, 1)
 }
