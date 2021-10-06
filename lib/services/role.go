@@ -1968,11 +1968,11 @@ func (set RoleSet) ExtractConditionForIdentifier(ctx RuleContext, namespace, res
 	// and concatenate their negations by AND.
 	var denyCond *types.WhereExpr
 	for _, role := range set {
-		matchNamespace, _ := MatchNamespace(role.GetNamespaces(Deny), types.ProcessNamespace(namespace))
+		matchNamespace, _ := MatchNamespace(role.GetNamespaces(types.Deny), types.ProcessNamespace(namespace))
 		if !matchNamespace {
 			continue
 		}
-		rules := MakeRuleSet(role.GetRules(Deny))
+		rules := MakeRuleSet(role.GetRules(types.Deny))
 		for _, rule := range rules[resource] {
 			expr, err := parseWhere(rule)
 			if err != nil {
@@ -1997,11 +1997,11 @@ func (set RoleSet) ExtractConditionForIdentifier(ctx RuleContext, namespace, res
 	// and concatenate by OR.
 	var allowCond *types.WhereExpr
 	for _, role := range set {
-		matchNamespace, _ := MatchNamespace(role.GetNamespaces(Allow), types.ProcessNamespace(namespace))
+		matchNamespace, _ := MatchNamespace(role.GetNamespaces(types.Allow), types.ProcessNamespace(namespace))
 		if !matchNamespace {
 			continue
 		}
-		rules := MakeRuleSet(role.GetRules(Allow))
+		rules := MakeRuleSet(role.GetRules(types.Allow))
 		for _, rule := range rules[resource] {
 			expr, err := parseWhere(rule)
 			if err != nil {
