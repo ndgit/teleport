@@ -696,7 +696,11 @@ func (f EventFields) GetString(key string) string {
 func (f EventFields) GetStrings(key string) []string {
 	val, found := f[key]
 	if !found {
-		return []string{}
+		return nil
+	}
+	strings, ok := val.([]string)
+	if ok {
+		return strings
 	}
 	slice, _ := val.([]interface{})
 	res := make([]string, 0, len(slice))
@@ -790,7 +794,7 @@ func ToEventFieldsCondition(cond *types.WhereExpr) (EventFieldsCondition, error)
 	if cond.Contains.L != nil && cond.Contains.R != nil {
 		left, right := cond.Contains.L, cond.Contains.R
 		getRight := func(ef EventFields) string { return ef.GetString(right.Field) }
-		if rightLit, rightIsLit := right.Literal.(string); rightIsLit {
+		if rightLit, ok := right.Literal.(string); ok {
 			getRight = func(ef EventFields) string { return rightLit }
 		}
 		if slice, ok := left.Literal.([]string); ok {
@@ -800,5 +804,5 @@ func ToEventFieldsCondition(cond *types.WhereExpr) (EventFieldsCondition, error)
 			return func(ef EventFields) bool { return apiutils.SliceContainsStr(ef.GetStrings(left.Field), getRight(ef)) }, nil
 		}
 	}
-	return nil, trace.BadParameter("failed to convert expression %q to EventFieldsCondition function", cond)
+	return nil, trace.BadParameter("failed to convert expression %q to EventFieldsCondition", cond)
 }
