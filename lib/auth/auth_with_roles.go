@@ -139,7 +139,7 @@ func (a *ServerWithRoles) authConnectorAction(namespace string, resource string,
 // sessionRecordingAction is a special checker that grants access to session
 // recordings. It allows access to specific recordings based on the `where`
 // section of the user's access rule.
-func (a *ServerWithRoles) sessionRecordingAction(namespace string, sid session.ID, resource string, verb string) error {
+func (a *ServerWithRoles) sessionRecordingAction(namespace string, sid session.ID, verb string) error {
 	ruleCtx := &services.Context{User: a.context.User}
 	origErr := a.context.Checker.CheckAccessToRule(ruleCtx, namespace, types.KindSession, verb, true)
 	if origErr == nil || !trace.IsAccessDenied(origErr) {
@@ -2029,7 +2029,7 @@ func (a *ServerWithRoles) UploadSessionRecording(r events.SessionRecording) erro
 }
 
 func (a *ServerWithRoles) GetSessionChunk(namespace string, sid session.ID, offsetBytes, maxBytes int) ([]byte, error) {
-	if err := a.sessionRecordingAction(namespace, sid, types.KindSession, types.VerbRead); err != nil {
+	if err := a.sessionRecordingAction(namespace, sid, types.VerbRead); err != nil {
 		return nil, trace.Wrap(err)
 	}
 
@@ -2037,7 +2037,7 @@ func (a *ServerWithRoles) GetSessionChunk(namespace string, sid session.ID, offs
 }
 
 func (a *ServerWithRoles) GetSessionEvents(namespace string, sid session.ID, afterN int, includePrintEvents bool) ([]events.EventFields, error) {
-	if err := a.sessionRecordingAction(namespace, sid, types.KindSession, types.VerbRead); err != nil {
+	if err := a.sessionRecordingAction(namespace, sid, types.VerbRead); err != nil {
 		return nil, trace.Wrap(err)
 	}
 
@@ -3184,7 +3184,7 @@ func (a *ServerWithRoles) ReplaceRemoteLocks(ctx context.Context, clusterName st
 // channel if one is encountered. Otherwise it is simply closed when the stream ends.
 // The event channel is not closed on error to prevent race conditions in downstream select statements.
 func (a *ServerWithRoles) StreamSessionEvents(ctx context.Context, sessionID session.ID, startIndex int64) (chan apievents.AuditEvent, chan error) {
-	if err := a.action(apidefaults.Namespace, types.KindSession, types.VerbList); err != nil {
+	if err := a.sessionRecordingAction(apidefaults.Namespace, sessionID, types.VerbList); err != nil {
 		c, e := make(chan apievents.AuditEvent), make(chan error, 1)
 		e <- trace.Wrap(err)
 		return c, e
