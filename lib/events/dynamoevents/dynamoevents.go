@@ -1059,14 +1059,14 @@ func fromWhereExpr(cond *types.WhereExpr, params *condFilterParams) (string, err
 		}
 		return format(left, right), nil
 	}
-	if expr, err := binOp(cond.And, func(a, b string) string { return fmt.Sprintf("(%s AND %s)", a, b) }); err == nil {
+	if expr, err := binOp(cond.And, func(a, b string) string { return fmt.Sprintf("(%s) AND (%s)", a, b) }); err == nil {
 		return expr, nil
 	}
-	if expr, err := binOp(cond.Or, func(a, b string) string { return fmt.Sprintf("(%s OR %s)", a, b) }); err == nil {
+	if expr, err := binOp(cond.Or, func(a, b string) string { return fmt.Sprintf("(%s) OR (%s)", a, b) }); err == nil {
 		return expr, nil
 	}
 	if inner, err := fromWhereExpr(cond.Not, params); err == nil {
-		return fmt.Sprintf("(NOT %s)", inner), nil
+		return fmt.Sprintf("NOT (%s)", inner), nil
 	}
 
 	addAttrValue := func(in interface{}) string {
@@ -1082,7 +1082,7 @@ func fromWhereExpr(cond *types.WhereExpr, params *condFilterParams) (string, err
 	addAttrName := func(n string) string {
 		for k, v := range params.attrNames {
 			if n == v {
-				return k
+				return fmt.Sprintf("FieldsMap.%s", k)
 			}
 		}
 		k := fmt.Sprintf("#condName%d", len(params.attrNames))

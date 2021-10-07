@@ -336,3 +336,26 @@ func (s *DynamoeventsLargeTableSuite) TestLargeTableRetrieve(c *check.C) {
 	// `check.HasLen` prints the entire array on failure, which pollutes the output.
 	c.Assert(len(history), check.Equals, eventCount)
 }
+
+func TestFromWhereExpr(t *testing.T) {
+	t.Parallel()
+
+	// !(equals(login, "root") || equals(login, "admin")) && contains(participants, "test-user")
+	cond := &types.WhereExpr{And: types.WhereExpr2{
+		L: &types.WhereExpr{Not: &types.WhereExpr{Or: types.WhereExpr2{
+			L: &types.WhereExpr{Equals: types.WhereExpr2{L: &types.WhereExpr{Field: "login"}, R: &types.WhereExpr{Literal: "root"}}},
+			R: &types.WhereExpr{Equals: types.WhereExpr2{L: &types.WhereExpr{Field: "login"}, R: &types.WhereExpr{Literal: "admin"}}},
+		}}},
+		R: &types.WhereExpr{Contains: types.WhereExpr2{L: &types.WhereExpr{Field: "participants"}, R: &types.WhereExpr{Literal: "test-user"}}},
+	}}
+
+	params := condFilterParams{attrNames: map[string]string{}, attrValues: map[string]interface{}{}}
+	expr, err := fromWhereExpr(cond, &params)
+	require.NoError(t, err)
+
+	require.Equal(t, "(NOT ((FieldsMap.#condName0 = :condValue0) OR (FieldsMap.#condName0 = :condValue1))) AND (contains(FieldsMap.#condName1, :condValue2))", expr)
+	require.Equal(t, condFilterParams{
+		attrNames:  map[string]string{"#condName0": "login", "#condName1": "participants"},
+		attrValues: map[string]interface{}{":condValue0": "root", ":condValue1": "admin", ":condValue2": "test-user"},
+	}, params)
+}
