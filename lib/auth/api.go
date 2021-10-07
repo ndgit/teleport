@@ -191,7 +191,7 @@ type ReadAccessPoint interface {
 	// GetWindowsDesktop returns a named windows desktop host.
 	GetWindowsDesktop(ctx context.Context, name string) (types.WindowsDesktop, error)
 
-	// GetWindowsDesktops returns windows desktop hosts.
+	// GetWindowsDesktopServices returns windows desktop hosts.
 	GetWindowsDesktopServices(ctx context.Context) ([]types.WindowsDesktopService, error)
 }
 
@@ -199,6 +199,12 @@ type ReadAccessPoint interface {
 type AccessPoint interface {
 	// ReadAccessPoint provides methods to read data
 	ReadAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type accessPoint interface {
 	// Announcer adds methods used to announce presence
 	Announcer
 	// Streamer creates and manages audit streams
@@ -213,8 +219,514 @@ type AccessPoint interface {
 	// DeleteTunnelConnection deletes tunnel connection
 	DeleteTunnelConnection(clusterName, connName string) error
 
-	// GetCertAuthority returns an empty CRL for a CA.
+	// GenerateCertAuthorityCRL returns an empty CRL for a CA.
 	GenerateCertAuthorityCRL(ctx context.Context, caType types.CertAuthType) ([]byte, error)
+}
+
+type ReadNodeAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetNetworkRestrictions returns networking restrictions for restricted shell to enforce
+	GetNetworkRestrictions(ctx context.Context) (types.NetworkRestrictions, error)
+}
+
+type NodeAccessPoint interface {
+	// ReadNodeAccessPoint provides methods to read data
+	ReadNodeAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type ReadProxyAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetUser returns a services.User for this cluster.
+	GetUser(name string, withSecrets bool) (types.User, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetNode returns a node by name and namespace.
+	GetNode(ctx context.Context, namespace, name string) (types.Server, error)
+
+	// GetNodes returns a list of registered servers for this cluster.
+	GetNodes(ctx context.Context, namespace string, opts ...services.MarshalOption) ([]types.Server, error)
+
+	// GetProxies returns a list of proxy servers registered in the cluster
+	GetProxies() ([]types.Server, error)
+
+	// GetAuthServers returns a list of auth servers registered in the cluster
+	GetAuthServers() ([]types.Server, error)
+
+	// GetReverseTunnels returns  a list of reverse tunnels
+	GetReverseTunnels(opts ...services.MarshalOption) ([]types.ReverseTunnel, error)
+
+	// GetAllTunnelConnections returns all tunnel connections
+	GetAllTunnelConnections(opts ...services.MarshalOption) ([]types.TunnelConnection, error)
+
+	// GetTunnelConnections returns tunnel connections for a given cluster
+	GetTunnelConnections(clusterName string, opts ...services.MarshalOption) ([]types.TunnelConnection, error)
+
+	// GetApplicationServers returns all registered application servers.
+	GetApplicationServers(ctx context.Context, namespace string) ([]types.AppServer, error)
+
+	// GetAppServers gets all application servers.
+	//
+	// DELETE IN 9.0. Deprecated, use GetApplicationServers.
+	GetAppServers(ctx context.Context, namespace string, opts ...services.MarshalOption) ([]types.Server, error)
+
+	// GetApps returns all application resources.
+	GetApps(ctx context.Context) ([]types.Application, error)
+
+	// GetApp returns the specified application resource.
+	GetApp(ctx context.Context, name string) (types.Application, error)
+
+	// GetNetworkRestrictions returns networking restrictions for restricted shell to enforce
+	GetNetworkRestrictions(ctx context.Context) (types.NetworkRestrictions, error)
+
+	// GetAppSession gets an application web session.
+	GetAppSession(context.Context, types.GetAppSessionRequest) (types.WebSession, error)
+
+	// GetWebSession gets a web session for the given request
+	GetWebSession(context.Context, types.GetWebSessionRequest) (types.WebSession, error)
+
+	// GetWebToken gets a web token for the given request
+	GetWebToken(context.Context, types.GetWebTokenRequest) (types.WebToken, error)
+
+	// GetRemoteClusters returns a list of remote clusters
+	GetRemoteClusters(opts ...services.MarshalOption) ([]types.RemoteCluster, error)
+
+	// GetRemoteCluster returns a remote cluster by name
+	GetRemoteCluster(clusterName string) (types.RemoteCluster, error)
+
+	// GetKubeServices returns a list of kubernetes services registered in the cluster
+	GetKubeServices(context.Context) ([]types.Server, error)
+
+	// GetDatabaseServers returns all registered database proxy servers.
+	GetDatabaseServers(ctx context.Context, namespace string, opts ...services.MarshalOption) ([]types.DatabaseServer, error)
+
+	// GetDatabases returns all database resources.
+	GetDatabases(ctx context.Context) ([]types.Database, error)
+
+	// GetDatabase returns the specified database resource.
+	GetDatabase(ctx context.Context, name string) (types.Database, error)
+
+	// GetWindowsDesktops returns windows desktop hosts.
+	GetWindowsDesktops(ctx context.Context) ([]types.WindowsDesktop, error)
+
+	// GetWindowsDesktop returns a named windows desktop host.
+	GetWindowsDesktop(ctx context.Context, name string) (types.WindowsDesktop, error)
+
+	// GetWindowsDesktopServices returns windows desktop hosts.
+	GetWindowsDesktopServices(ctx context.Context) ([]types.WindowsDesktopService, error)
+}
+
+type ProxyAccessPoint interface {
+	// ReadProxyAccessPoint provides methods to read data
+	ReadProxyAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type ReadRemoteProxyAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetNode returns a node by name and namespace.
+	GetNode(ctx context.Context, namespace, name string) (types.Server, error)
+
+	// GetNodes returns a list of registered servers for this cluster.
+	GetNodes(ctx context.Context, namespace string, opts ...services.MarshalOption) ([]types.Server, error)
+
+	// GetProxies returns a list of proxy servers registered in the cluster
+	GetProxies() ([]types.Server, error)
+
+	// GetAuthServers returns a list of auth servers registered in the cluster
+	GetAuthServers() ([]types.Server, error)
+
+	// GetReverseTunnels returns  a list of reverse tunnels
+	GetReverseTunnels(opts ...services.MarshalOption) ([]types.ReverseTunnel, error)
+
+	// GetAllTunnelConnections returns all tunnel connections
+	GetAllTunnelConnections(opts ...services.MarshalOption) ([]types.TunnelConnection, error)
+
+	// GetTunnelConnections returns tunnel connections for a given cluster
+	GetTunnelConnections(clusterName string, opts ...services.MarshalOption) ([]types.TunnelConnection, error)
+
+	// GetAppServers gets all application servers.
+	//
+	// DELETE IN 9.0. Deprecated, use GetApplicationServers.
+	GetAppServers(ctx context.Context, namespace string, opts ...services.MarshalOption) ([]types.Server, error)
+
+	// GetApplicationServers returns all registered application servers.
+	GetApplicationServers(ctx context.Context, namespace string) ([]types.AppServer, error)
+
+	// GetRemoteClusters returns a list of remote clusters
+	GetRemoteClusters(opts ...services.MarshalOption) ([]types.RemoteCluster, error)
+
+	// GetRemoteCluster returns a remote cluster by name
+	GetRemoteCluster(clusterName string) (types.RemoteCluster, error)
+
+	// GetKubeServices returns a list of kubernetes services registered in the cluster
+	GetKubeServices(context.Context) ([]types.Server, error)
+
+	// GetDatabaseServers returns all registered database proxy servers.
+	GetDatabaseServers(ctx context.Context, namespace string, opts ...services.MarshalOption) ([]types.DatabaseServer, error)
+}
+
+type RemoteProxyAccessPoint interface {
+	// ReadRemoteProxyAccessPoint provides methods to read data
+	ReadRemoteProxyAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type ReadKubernetesAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetUser returns a services.User for this cluster.
+	GetUser(name string, withSecrets bool) (types.User, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetKubeServices returns a list of kubernetes services registered in the cluster
+	GetKubeServices(context.Context) ([]types.Server, error)
+}
+
+type KubernetesAccessPoint interface {
+	// ReadKubernetesAccessPoint provides methods to read data
+	ReadKubernetesAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type ReadAppsAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetUser returns a services.User for this cluster.
+	GetUser(name string, withSecrets bool) (types.User, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetProxies returns a list of proxy servers registered in the cluster
+	GetProxies() ([]types.Server, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetApps returns all application resources.
+	GetApps(ctx context.Context) ([]types.Application, error)
+
+	// GetApp returns the specified application resource.
+	GetApp(ctx context.Context, name string) (types.Application, error)
+}
+
+type AppsAccessPoint interface {
+	// ReadAppsAccessPoint provides methods to read data
+	ReadAppsAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type ReadDatabaseAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetUser returns a services.User for this cluster.
+	GetUser(name string, withSecrets bool) (types.User, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetProxies returns a list of proxy servers registered in the cluster
+	GetProxies() ([]types.Server, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetDatabases returns all database resources.
+	GetDatabases(ctx context.Context) ([]types.Database, error)
+
+	// GetDatabase returns the specified database resource.
+	GetDatabase(ctx context.Context, name string) (types.Database, error)
+}
+
+type DatabaseAccessPoint interface {
+	// ReadDatabaseAccessPoint provides methods to read data
+	ReadDatabaseAccessPoint
+
+	// accessPoint
+	accessPoint
+}
+
+type ReadWindowsDesktopAccessPoint interface {
+	// Closer closes all the resources
+	io.Closer
+
+	// NewWatcher returns a new event watcher.
+	NewWatcher(ctx context.Context, watch types.Watch) (types.Watcher, error)
+
+	// GetCertAuthority returns cert authority by id
+	GetCertAuthority(id types.CertAuthID, loadKeys bool, opts ...services.MarshalOption) (types.CertAuthority, error)
+
+	// GetCertAuthorities returns a list of cert authorities
+	GetCertAuthorities(caType types.CertAuthType, loadKeys bool, opts ...services.MarshalOption) ([]types.CertAuthority, error)
+
+	// GetClusterName gets the name of the cluster from the backend.
+	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
+
+	// GetClusterAuditConfig returns cluster audit configuration.
+	GetClusterAuditConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterAuditConfig, error)
+
+	// GetClusterNetworkingConfig returns cluster networking configuration.
+	GetClusterNetworkingConfig(ctx context.Context, opts ...services.MarshalOption) (types.ClusterNetworkingConfig, error)
+
+	// GetAuthPreference returns the cluster authentication configuration.
+	GetAuthPreference(ctx context.Context) (types.AuthPreference, error)
+
+	// GetSessionRecordingConfig returns session recording configuration.
+	GetSessionRecordingConfig(ctx context.Context, opts ...services.MarshalOption) (types.SessionRecordingConfig, error)
+
+	// GetUser returns a services.User for this cluster.
+	GetUser(name string, withSecrets bool) (types.User, error)
+
+	// GetRole returns role by name
+	GetRole(ctx context.Context, name string) (types.Role, error)
+
+	// GetRoles returns a list of roles
+	GetRoles(ctx context.Context) ([]types.Role, error)
+
+	// GetNamespaces returns a list of namespaces
+	GetNamespaces() ([]types.Namespace, error)
+
+	// GetNamespace returns namespace by name
+	GetNamespace(name string) (*types.Namespace, error)
+
+	// GetWindowsDesktops returns windows desktop hosts.
+	GetWindowsDesktops(ctx context.Context) ([]types.WindowsDesktop, error)
+
+	// GetWindowsDesktop returns a named windows desktop host.
+	GetWindowsDesktop(ctx context.Context, name string) (types.WindowsDesktop, error)
+
+	// GetWindowsDesktopServices returns windows desktop hosts.
+	GetWindowsDesktopServices(ctx context.Context) ([]types.WindowsDesktopService, error)
+}
+
+type WindowsDesktopAccessPoint interface {
+	// ReadWindowsDesktopAccessPoint provides methods to read data
+	ReadWindowsDesktopAccessPoint
+
+	// accessPoint
+	accessPoint
 }
 
 // AccessCache is a subset of the interface working on the certificate authorities
@@ -238,7 +750,7 @@ type AccessCache interface {
 	GetClusterName(opts ...services.MarshalOption) (types.ClusterName, error)
 }
 
-// Cache is a subset of the auth interface hanlding
+// Cache is a subset of the auth interface handling
 // access to the discovery API and static tokens
 type Cache interface {
 	ReadAccessPoint
@@ -399,9 +911,9 @@ func (w *Wrapper) GenerateCertAuthorityCRL(ctx context.Context, caType types.Cer
 	return crl, trace.Wrap(err)
 }
 
-// NewCachingAcessPoint returns new caching access point using
+// NewCachingAccessPoint returns new caching access point using
 // access point policy
-type NewCachingAccessPoint func(clt ClientI, cacheName []string) (AccessPoint, error)
+type NewCachingAccessPoint func(clt ClientI, cacheName []string) (RemoteProxyAccessPoint, error)
 
 // NoCache is a no cache used for access point
 func NoCache(clt ClientI, cacheName []string) (AccessPoint, error) {

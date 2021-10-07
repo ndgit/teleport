@@ -289,8 +289,8 @@ func OnStart(config *service.Config) error {
 func onStatus() error {
 	sshClient := os.Getenv("SSH_CLIENT")
 	systemUser := os.Getenv("USER")
-	teleportUser := os.Getenv(teleport.SSHTeleportUser)
 	proxyHost := os.Getenv(teleport.SSHSessionWebproxyAddr)
+	teleportUser := os.Getenv(teleport.SSHTeleportUser)
 	clusterName := os.Getenv(teleport.SSHTeleportClusterName)
 	hostUUID := os.Getenv(teleport.SSHTeleportHostUUID)
 	sid := os.Getenv(teleport.SSHSessionID)

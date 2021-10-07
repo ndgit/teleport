@@ -775,7 +775,7 @@ type mockRemoteSite struct {
 func (s mockRemoteSite) GetName() string { return s.name }
 
 type mockAccessPoint struct {
-	auth.AccessPoint
+	auth.KubernetesAccessPoint
 
 	netConfig       types.ClusterNetworkingConfig
 	recordingConfig types.SessionRecordingConfig

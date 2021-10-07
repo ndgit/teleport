@@ -1,3 +1,4 @@
+//go:build linux
 // +build linux
 
 /*
@@ -168,7 +169,6 @@ func (s *ExecSuite) TestOSCommandPrep(c *check.C) {
 		"TERM=xterm",
 		fmt.Sprintf("SSH_TTY=%v", s.ctx.session.term.TTY().Name()),
 		"SSH_SESSION_ID=xxx",
-		"SSH_SESSION_WEBPROXY_ADDR=<proxyhost>:3080",
 		"SSH_TELEPORT_HOST_UUID=00000000-0000-0000-0000-000000000000",
 		"SSH_TELEPORT_CLUSTER_NAME=localhost",
 		"SSH_TELEPORT_USER=galt",
@@ -425,7 +425,7 @@ func (f *fakeTerminal) SetTermType(string) {
 type fakeServer struct {
 	auditLog events.IAuditLog
 	events.MockEmitter
-	accessPoint auth.AccessPoint
+	accessPoint AccessPoint
 	id          string
 }
 
@@ -457,7 +457,7 @@ func (f *fakeServer) PermitUserEnvironment() bool {
 	return true
 }
 
-func (f *fakeServer) GetAccessPoint() auth.AccessPoint {
+func (f *fakeServer) GetAccessPoint() AccessPoint {
 	return f.accessPoint
 }
 
