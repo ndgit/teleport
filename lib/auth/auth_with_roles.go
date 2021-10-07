@@ -3113,6 +3113,10 @@ func (a *ServerWithRoles) SearchEvents(fromUTC, toUTC time.Time, namespace strin
 
 // SearchSessionEvents allows searching session audit events with pagination support.
 func (a *ServerWithRoles) SearchSessionEvents(fromUTC, toUTC time.Time, limit int, order types.EventOrder, startKey string, cond *types.WhereExpr) (events []apievents.AuditEvent, lastKey string, err error) {
+	if cond != nil {
+		return nil, "", trace.BadParameter("cond should not be set")
+	}
+
 	if actionErr := a.action(apidefaults.Namespace, types.KindSession, types.VerbList); actionErr != nil {
 		if !trace.IsAccessDenied(actionErr) {
 			return nil, "", trace.Wrap(actionErr)
