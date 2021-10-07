@@ -86,6 +86,10 @@ type fileTransfer struct {
 	ctx           *SessionContext
 	authClient    auth.ClientI
 	proxyHostPort string
+
+	// ALPNSNIListenerEnabled indicates that proxy supports ALPN SNI server where
+	// all proxy services are exposed on a single TLS listener (Proxy Web Listener).
+	ALPNSNIListenerEnabled bool
 }
 
 func (f *fileTransfer) download(req fileTransferRequest, httpReq *http.Request, w http.ResponseWriter) error {
@@ -154,7 +158,7 @@ func (f *fileTransfer) createClient(req fileTransferRequest, httpReq *http.Reque
 		return nil, trace.BadParameter("invalid server name %q: %v", req.server, err)
 	}
 
-	cfg, err := makeTeleportClientConfig(f.ctx)
+	cfg, err := makeTeleportClientConfig(f.ctx, f.ALPNSNIListenerEnabled)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
